@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<link rel="manifest" href="manifest.json">
+<title>Star's Night B 4 Pick Up</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f3f4f6;color:#111827}
+header{background:#111827;color:white;padding:28px 20px 24px;border-radius:0 0 24px 24px}
+h1{margin:0;font-size:30px}.tag{opacity:.85;margin-top:5px}.wrap{max-width:700px;margin:auto}
+.card{background:white;margin:16px;border-radius:18px;padding:20px;box-shadow:0 3px 15px #0000000d}
+.price{font-size:28px;font-weight:800}.muted{color:#6b7280}.grid{display:grid;gap:12px}
+label{font-weight:650;font-size:14px}input,select,button{width:100%;padding:14px;border-radius:12px;font-size:16px}
+input,select{border:1px solid #d1d5db;background:white}button{border:0;background:#16a34a;color:white;font-weight:750;cursor:pointer}
+button.secondary{background:#e5e7eb;color:#111827}.choice{border:1px solid #d1d5db;border-radius:12px;padding:13px}
+.choice input{width:auto;margin-right:8px}.success{background:#dcfce7;padding:15px;border-radius:12px;margin-top:14px;display:none}
+.nav{display:flex;gap:8px;margin:16px}.nav button{background:#111827}.hidden{display:none}.small{font-size:13px}
+.item{border:1px solid #e5e7eb;border-radius:12px;padding:13px;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><h1>🗑️ Star's Night B 4 Pick Up</h1><div class="tag">We take your bins to the curb — and bring them back.</div></header>
+
+<div class="nav">
+<button onclick="show('book')">Book Service</button>
+<button onclick="show('admin')">My Business</button>
+</div>
+
+<section id="book">
+<div class="card">
+<div class="price">$15/week</div>
+<div class="muted">Full curbside bin service</div>
+<br>
+<div class="grid">
+<div><label>Your name</label><input id="name" placeholder="Jane Smith"></div>
+<div><label>Phone</label><input id="phone" type="tel" placeholder="(269) 555-0000"></div>
+<div><label>Service address</label><input id="address" placeholder="Street address, Portage/Kalamazoo"></div>
+<div><label>Trash pickup day</label>
+<select id="day"><option value="">Choose a day</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option></select></div>
+<div>
+<label>Service</label>
+<label class="choice"><input type="radio" name="service" value="Full service — take out + return" checked> $15/week — Take out + return</label>
+<label class="choice"><input type="radio" name="service" value="Take out only"> $10/week — Take out only</label>
+<label class="choice"><input type="radio" name="service" value="Return only"> $10/week — Return only</label>
+</div>
+<button onclick="book()">Request My Service</button>
+</div>
+<div id="success" class="success"></div>
+</div>
+
+<div class="card">
+<h2>How it works</h2>
+<p>1️⃣ Tell us where you live and your pickup day.</p>
+<p>2️⃣ We take your bins to the curb.</p>
+<p>3️⃣ After pickup, we return them to your home.</p>
+<p class="muted small">Serving Portage and Kalamazoo. Final service availability is confirmed by Star's Night B 4 Pick Up.</p>
+</div>
+</section>
+
+<section id="admin" class="hidden">
+<div class="card">
+<h2>Business Dashboard</h2>
+<p class="muted">This starter version saves requests on this phone.</p>
+<button class="secondary" onclick="clearAll()">Clear demo requests</button>
+<div id="requests"></div>
+</div>
+</section>
+</div>
+
+<script>
+const KEY="binBuddyRequests";
+function show(which){
+ document.getElementById("book").classList.toggle("hidden",which!=="book");
+ document.getElementById("admin").classList.toggle("hidden",which!=="admin");
+ if(which==="admin") render();
+}
+function book(){
+ const name=document.getElementById("name").value.trim();
+ const phone=document.getElementById("phone").value.trim();
+ const address=document.getElementById("address").value.trim();
+ const day=document.getElementById("day").value;
+ const service=document.querySelector('input[name="service"]:checked').value;
+ if(!name||!phone||!address||!day){alert("Please fill in every field.");return;}
+ const req={id:Date.now(),name,phone,address,day,service,status:"New",created:new Date().toLocaleString()};
+ const arr=JSON.parse(localStorage.getItem(KEY)||"[]");arr.unshift(req);localStorage.setItem(KEY,JSON.stringify(arr));
+ document.getElementById("success").style.display="block";
+ document.getElementById("success").innerHTML="<b>Request received!</b><br>Thanks "+name+". Star's Night B 4 Pick Up will contact you to confirm your service.";
+ ["name","phone","address"].forEach(id=>document.getElementById(id).value="");document.getElementById("day").value="";
+}
+function render(){
+ const arr=JSON.parse(localStorage.getItem(KEY)||"[]"), box=document.getElementById("requests");
+ if(!arr.length){box.innerHTML="<p class='muted'>No requests yet.</p>";return;}
+ box.innerHTML=arr.map(r=>`<div class="item"><b>${esc(r.name)}</b> — ${esc(r.service)}<br>📍 ${esc(r.address)}<br>📅 ${esc(r.day)} · 📞 ${esc(r.phone)}<br><span class="muted small">${esc(r.created)}</span></div>`).join("");
+}
+function clearAll(){if(confirm("Clear all requests saved on this phone?")){localStorage.removeItem(KEY);render();}}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
+</script>
+</body>
+</html>
